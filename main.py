@@ -52,7 +52,7 @@ class obstruction(pygame.sprite.Sprite):
         self.rect = pygame.Rect(x, y, w, h)
 
     def getRect(self):
-    	return self.rect
+        return self.rect
 
 
 class mySprite(pygame.sprite.Sprite):
@@ -96,6 +96,7 @@ class mySprite(pygame.sprite.Sprite):
             self.counter = 0
 
         if self.index >= len(self.images):
+            self.image = self.images[len(self.images)-1]    
             return 1
 
         self.image = self.images[self.index]
@@ -108,7 +109,7 @@ class mySprite(pygame.sprite.Sprite):
         self.rect = pygame.Rect(self.x, self.y, self.w, self.h)
 
     def getRect(self):
-    	return self.rect
+        return self.rect
 
 
 class Character():
@@ -146,6 +147,9 @@ class Character():
     def getLoc(self):
         return self.posx, self.posy
 
+    def setVel(self, newv):
+        self.vx, self.vy = newv
+
     def getVel(self):
         return self.vx, self.vy
 
@@ -174,9 +178,14 @@ class State():
         self.sprite.move(newpos)
 
 
-def col_check(x, y, w, h, x2, y2, w2, h2):
-	if (x < (x2 + w2) and (x + w) > x2 and y < (y2 + h2) and (h + y) > y2):
-		print("COLLIDED!!!")
+def col_check(rect1, rect2):
+    x, y, w, h = rect1
+    x2, y2, w2, h2 = rect2
+    res = False
+    if (x < (x2 + w2) and (x + w) > x2 and y < (y2 + h2) and (h + y) > y2):
+        # print("COLLIDED!!!")
+        res = True
+    return res
 
 
 def main():
@@ -207,6 +216,8 @@ def main():
     cs.addState("Intro", False, "Resources/images/cut/intro.png",
                 (swidth, sheight), cs.findState("Stand"))
     cs.updateState(cs.findState("Intro"))
+    cs.addState("Take_cover", False, "Resources/images/cut/take_cover.png", (swidth, sheight))
+    cs.addState("Trans_open_cover", False, "Resources/images/cut/open_cover.png", (swidth, sheight), cs.findState("Stand"))
     for item in alist:
         print(item.getName())
 
@@ -214,12 +225,20 @@ def main():
     # cs_group = pygame.sprite.Group(cs)
 
     # Declaring Floors & Walls
+    # bot = 0-255, 191
+    # left = 16, 0-223
+    # top = 0-255, 14
+    # right = 241, 0-223
     floor = obstruction(0, 191, 255, 223)
+    left_wall = obstruction(0, 0, 16, 223)
+    right_wall = obstruction(241, 0, 255, 223)
+    ceiling = obstruction(0, 0, 255, 14)
 
     # For continuous movement
-    move_right = move_left = move_up = move_down = False
+    move_right = move_left = False
+    on_floor = False
     while True:
-
+        # Event triggers
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -232,68 +251,93 @@ def main():
                 elif event.key == pygame.K_LEFT:
                     move_left = True
                 elif event.key == pygame.K_UP:
-                    move_up = True
+                    pass
                 elif event.key == pygame.K_DOWN:
-                    move_down = True
+                    if(cs.getState().getName() == "Take_cover"):
+                        cs_curr_sprite.resetIndex()
+                        cs.updateState(cs.findState("Trans_open_cover"))
+                    else:
+                        cs.updateState(cs.findState("Take_cover"))
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_RIGHT:
                     move_right = False
                 elif event.key == pygame.K_LEFT:
                     move_left = False
                 elif event.key == pygame.K_UP:
-                    move_up = False
+                    pass
                 elif event.key == pygame.K_DOWN:
-                    move_down = False
+                    pass
         # Check for movement
+        cs_rect = cs.getState().getSprite().getRect()
         if(move_right):
-            x, y = cs.getLoc()
-            vx, vy = cs.getVel()
-            x += vx
-            cs.move((x, y))
+            rw_rect = right_wall.getRect()
+            if(col_check(cs_rect, rw_rect)):
+                cs.setVel((0, 0))
+            else:
+                cs.setVel((5, 0))
         elif(move_left):
-            x, y = cs.getLoc()
-            vx, vy = cs.getVel()
-            x -= vx
-            cs.move((x, y))
-        elif(move_up):
-            x, y = cs.getLoc()
-            vx, vy = cs.getVel()
-            y -= vy
-            cs.move((x, y))
-        elif(move_down):
-            x, y = cs.getLoc()
-            vx, vy = cs.getVel()
-            y += vy
-            cs.move((x, y))
+            lw_rect = left_wall.getRect()
+            if(col_check(cs_rect, lw_rect)):
+                cs.setVel((0, 0))
+            else:
+                cs.setVel((-5, 0))
 
-        # State transitions
+        # Move by speed
+        vx, vy = cs.getVel()
+        x, y = cs.getLoc()
+        x += vx
+        y += vy
+        cs.move((x, y))
+
+        # Sprite grouping
+        # Crystal Snail
         cs_curr_sprite = cs.getState().getSprite()
         cs_group = pygame.sprite.Group(cs_curr_sprite)
+
+        # Obstructions (walls, floor, and ceiling)
+        obs_group = pygame.sprite.Group(floor, left_wall, right_wall, ceiling)
+
+        # State transitions
         if(cs.getState().getLoop()):
             cs_curr_sprite.loop()
         elif(not cs.getState().getLoop()):
             done = cs_curr_sprite.play()
             if(done):
-                cs.updateState(cs.getState().nextState())
-                cs_curr_sprite.resetIndex()
-        obs_group = pygame.sprite.Group(floor)
+                nextState = cs.getState().nextState()
+                if nextState == None:
+                    pass
+                else:
+                    cs.updateState(nextState)
+                    cs_curr_sprite.resetIndex()
+                
+        
         # Check functions
         # print(cs.getState().getName())
         # print(pygame.mouse.get_pos())
 
-        # If CS collides with floor
-        a, b, c, d = cs.getState().getSprite().getRect()
-        e, f, g, h = floor.getRect()
-        col_check(a, b, c, d, e, f, g, h)
-        # if pygame.sprite.spritecollide(cs.getState().getSprite(), obs_group, True):
-        # 	print(cs.getState().getSprite().getRect(), floor.getRect())
-        # 	print("cs collided with floor")
-
+        # If CS collides with obstructions
+        cs_rect = cs.getState().getSprite().getRect()
+        # CS with floor
+        floor_rect = floor.getRect()
+        if(on_floor):
+            cs.setVel((0, 0))
+        else:
+            cs.setVel((0, 5))
+        if(col_check(cs_rect, floor_rect)):
+            on_floor = True
+            cs.setVel((0, 0))
+        # CS with ceiling
+        ceil_rect = ceiling.getRect()
+        if(col_check(cs_rect, ceil_rect)):
+            cs.setVel((0, 0))
+        
+        # Update screen
         screen.fill((255, 255, 255))
         screen.blit(bg.image, bg.rect)
         cs_group.draw(screen)
         pygame.display.update()
 
+        # FPS
         clock.tick(FPS)
 
 
