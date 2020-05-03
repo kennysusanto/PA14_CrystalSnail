@@ -1,0 +1,10 @@
+yg masih perlu dikerjain:
+1. benerin logic click launch towards target
+2. Slow down time ngefek ke megaman selama 10 s
+3. tambah 2 projectile yg 60 deg sama horizontal
+	lalu kalo kena megaman dia jadi frozen
+4. bug megaman dummy die selalu stagger kalo posisi take cover
+5. tambah tulisan untuk navigasi crystal snail di screen
+6. dummy bisa nembak dan cs bisa lepas dari shell
+
+prioritas: 3-2-1-5-4-6

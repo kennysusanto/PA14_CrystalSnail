@@ -1,0 +1,3 @@
+('D:\\Documents\\President '
+ 'University\\20192\\CGA\\PA14_CrystalSnail\\build\\main\\PYZ-00.pyz',
+ [])

@@ -1,0 +1,6 @@
+megaman
+cut_intro.png 30x48
+cut_run.png 34x35
+cut_rungun.png 38x36
+cut_hitordie.png 26x36
+cut_projectile.png 9x9
