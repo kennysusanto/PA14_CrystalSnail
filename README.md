@@ -9,8 +9,10 @@ Group members:
 2. Gilang Martadinata - 0012018022
 3. Kenny Susanto - 001201800047
 
-Download the main.exe from /dist folder
+How to run the executable
 
-If the executable won't run, use command prompt (on windows)
+Download the main folder from dist folder
 
-```.\dist\main.exe```
+Run command prompt (on windows) as administrator on master folder
+
+type in ```.\dist\main\main.exe```
