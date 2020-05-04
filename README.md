@@ -13,7 +13,7 @@ Group members:
 
 1. Clone the repository to your computer
 
-2. Run command prompt (on windows) as administrator on master folder
+2. Run command prompt (on Windows) as administrator on master folder
 
 3. type in ```.\dist\main\main.exe```
 
@@ -27,3 +27,7 @@ Make sure you have these softwares installed in your computer:
 Python 3.6 or above
 
 Pynum installed for pip
+
+Execute the python script by running a command prompt (on Windows)
+
+and type ```py main.py``` or ```python3 main.py``` depending on your installation of python
