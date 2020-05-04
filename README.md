@@ -9,10 +9,12 @@ Group members:
 2. Gilang Martadinata - 0012018022
 3. Kenny Susanto - 001201800047
 
-How to run the executable
+**How to run the executable**
 
-Download the main folder from dist folder
+1. Download the main folder from dist folder
 
-Run command prompt (on windows) as administrator on master folder
+2. Run command prompt (on windows) as administrator on master folder
 
-type in ```.\dist\main\main.exe```
+3. type in ```.\dist\main\main.exe```
+
+Note: Error such as **failed to execute script main** is normal, simply try again
