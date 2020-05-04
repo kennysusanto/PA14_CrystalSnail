@@ -11,10 +11,19 @@ Group members:
 
 **How to run the executable**
 
-1. Download the main folder from dist folder
+1. Clone the repository to your computer
 
 2. Run command prompt (on windows) as administrator on master folder
 
 3. type in ```.\dist\main\main.exe```
 
 Note: Error such as **failed to execute script main** is normal, simply try again
+
+
+If the problem still persists, try running the python script directly
+
+Make sure you have these softwares installed in your computer:
+
+Python 3.6 or above
+
+Pynum installed for pip
