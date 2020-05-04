@@ -47,7 +47,7 @@
  [],
  False,
  False,
- 1588565127,
+ 1588571577,
  [('run_d.exe',
    'c:\\users\\kenny\\appdata\\local\\programs\\python\\python36\\lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit\\run_d.exe',
    'EXECUTABLE')])

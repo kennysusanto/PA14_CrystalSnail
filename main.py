@@ -6,8 +6,8 @@ import math
 import random
 import classes as fc
 
-display_width = 256
-display_height = 223
+display_width = 256 + 100
+display_height = 223 + 100
 disp_SIZE = display_width, display_height
 # BACKGROUND_COLOR = pygame.Color('white')
 FPS = 30
@@ -53,19 +53,19 @@ def main():
     screen.blit(bg.image, bg.rect)
 
     # instructions
-    myfont = pygame.font.SysFont("Arial", 10)
+    myfont = pygame.font.SysFont("Arial", 12)
 
     # sprite size
     swidth = 43
     sheight = 46
 
     # default spawn position
-    dx = 100
+    dx = display_width/2
     dy = 100
 
     # Declaring characters
-    cs = fc.Character("Crystal Snail", (dx+50, 15), (0, 128, 255), "left")
-    mm = fc.Character("Megaman_dummy", (dx-50, dy), (50, 96, 166), "left")
+    cs = fc.Character("Crystal Snail", (dx+80, 30), (0, 128, 255), "left")
+    mm = fc.Character("Megaman_dummy", (dx-80, dy), (50, 96, 166), "left")
 
     # Declaring states for Crystal Snail
     alist = cs.getStates()
@@ -213,10 +213,10 @@ def main():
     # left = 16, 0-223
     # top = 0-255, 14
     # right = 241, 0-223
-    floor = fc.obstruction(0, 190, 255, 223)
-    left_wall = fc.obstruction(0, 0, 16, 223)
-    right_wall = fc.obstruction(241, 0, 255, 223)
-    ceiling = fc.obstruction(0, 0, 255, 14)
+    floor = fc.obstruction(0, display_height-(44), display_width, display_height)
+    left_wall = fc.obstruction(0, 0, 22, display_height)
+    right_wall = fc.obstruction(display_width-21, 0, display_width, display_height)
+    ceiling = fc.obstruction(0, 0, display_width, 21)
 
     # Declaring crystal projectile with default attributes
     # 45 deg
@@ -313,11 +313,13 @@ def main():
                         cs.findState("Shoot_projectile").resetIndex()
                         x, y, w, h = cs.getState().getRect()
                         a = math.floor(x+(w/2))
-                        b = y-30
-                        print(a, b)
-                        projectile1.setSpawn((a, b))
-                        projectile2.setSpawn((a, b))
-                        projectile3.setSpawn((a, b))
+                        b = y
+                        # projectile1.setSpawn((a, b))
+                        # projectile2.setSpawn((a, b))
+                        # projectile3.setSpawn((a, b))
+                        projectile1.move((a, b))
+                        projectile2.move((a, b))
+                        projectile3.move((a, b))
                         cs.updateState(cs.findState("Shoot_projectile"))
                 elif event.key == pygame.K_d:
                     if cs.getState().getName() == "Launch_upwards":
@@ -351,7 +353,6 @@ def main():
                     line2 = (a+(c/2), b+(d/2)), pos
                     # print(ang(line1, line2))
                     angle = calcAngle(line1, line2)
-                    print(angle)
 
                     cs.updateState(cs.findState("Launch_towards_target"))
                     
@@ -433,35 +434,35 @@ def main():
         if cs.getState().getName() == "intro_roll1":
             gravity = True
             x, y, w, h = cs.getState().getRect()
-            if y >= 100:
+            if y >= 170:
                 gravity = False
                 cs.setVel((0, 0))
 
         if cs.getState().getName() == "intro_roll2":
             gravity = True
             x, y, w, h = cs.getState().getRect()
-            if y >= 100:
+            if y >= 170:
                 gravity = False
                 cs.setVel((0, 0))
 
         if cs.getState().getName() == "intro_bounce":
             gravity = True
-            if bctr >= 100:
+            if bctr >= 60:
                 cs.updateState(cs.findState("Intro"))
                 x, y, w, h = cs_rect
                 cs.move((x, y-11))
             
-            if bctr == 50:
+            if bctr == 15:
                 bounce = True
-            elif bctr == 60:
+            elif bctr == 25:
                 bounce = False
-            elif bctr == 70:
+            elif bctr == 35:
                 bounce = True
-            elif bctr == 75:
+            elif bctr == 40:
                 bounce = False
-            elif bctr == 80:
+            elif bctr == 45:
                 bounce = True
-            elif bctr == 83:
+            elif bctr == 48:
                 bounce = False
 
             bctr += 1
@@ -495,7 +496,7 @@ def main():
             floor = tmp_floor
             gravity = False
             x1, y1 = cs.getLoc()
-            if y1 <= (y0-130):
+            if y1 <= (y0-250):
                 cs.setVel((0, 0))
             else:
                 cs.setVel((0, -5))
@@ -564,62 +565,90 @@ def main():
         if slowmo:
             if smctr >= 300:
                 slowmo = False
+                smctr = 0
             smctr += 1
 
         # Shoot projectile
-        # gravity for projectile 1
-        vx, vy = projectile1.getVel()
-        vy += 0.5
-        projectile1.setVel((vx, vy))
-        # projectile 1 hitting obs
-        if col_check(projectile1.getRect(), floor.getRect()):
-            projectile1.setVel((0, 0))
-            throwable1 = False
-        elif col_check(projectile1.getRect(), left_wall.getRect()):
-            projectile1.setVel((0, 0))
-            throwable1 = False
-        elif col_check(projectile1.getRect(), right_wall.getRect()):
-            projectile1.setVel((0, 0))
-            throwable1 = False
-        elif col_check(projectile1.getRect(), ceiling.getRect()):
-            projectile1.setVel((0, 0))
-            throwable1 = False
+        if throwable1:
+            # gravity for projectile 1
+            vx, vy = projectile1.getVel()
+            vy += 0.5
+            projectile1.setVel((vx, vy))
+            # projectile 1 hitting obs
+            if col_check(projectile1.getRect(), floor.getRect()):
+                projectile1.setVel((0, 0))
+                throwable1 = False
+                # move the projectiles out of the way eventhough not drawn on screen
+                projectile1.move((0, 0))
+            elif col_check(projectile1.getRect(), left_wall.getRect()):
+                projectile1.setVel((0, 0))
+                throwable1 = False
+                # move the projectiles out of the way eventhough not drawn on screen
+                projectile1.move((0, 0))
+            elif col_check(projectile1.getRect(), right_wall.getRect()):
+                projectile1.setVel((0, 0))
+                throwable1 = False
+                # move the projectiles out of the way eventhough not drawn on screen
+                projectile1.move((0, 0))
+            elif col_check(projectile1.getRect(), ceiling.getRect()):
+                projectile1.setVel((0, 0))
+                throwable1 = False
+                # move the projectiles out of the way eventhough not drawn on screen
+                projectile1.move((0, 0))
 
-        # gravity for projectile 2
-        vx, vy = projectile2.getVel()
-        vy += 0.5
-        projectile2.setVel((vx, vy))
-        # projectile 2 hitting obs
-        if col_check(projectile2.getRect(), floor.getRect()):
-            projectile2.setVel((0, 0))
-            throwable2 = False
-        elif col_check(projectile2.getRect(), left_wall.getRect()):
-            projectile2.setVel((0, 0))
-            throwable2 = False
-        elif col_check(projectile2.getRect(), right_wall.getRect()):
-            projectile2.setVel((0, 0))
-            throwable2 = False
-        elif col_check(projectile2.getRect(), ceiling.getRect()):
-            projectile2.setVel((0, 0))
-            throwable2 = False
+        if throwable2:
+            # gravity for projectile 2
+            vx, vy = projectile2.getVel()
+            vy += 0.5
+            projectile2.setVel((vx, vy))
+            # projectile 2 hitting obs
+            if col_check(projectile2.getRect(), floor.getRect()):
+                projectile2.setVel((0, 0))
+                throwable2 = False
+                # move the projectiles out of the way eventhough not drawn on screen
+                projectile2.move((0, 0))
+            elif col_check(projectile2.getRect(), left_wall.getRect()):
+                projectile2.setVel((0, 0))
+                throwable2 = False
+                # move the projectiles out of the way eventhough not drawn on screen
+                projectile2.move((0, 0))
+            elif col_check(projectile2.getRect(), right_wall.getRect()):
+                projectile2.setVel((0, 0))
+                throwable2 = False
+                # move the projectiles out of the way eventhough not drawn on screen
+                projectile2.move((0, 0))
+            elif col_check(projectile2.getRect(), ceiling.getRect()):
+                projectile2.setVel((0, 0))
+                throwable2 = False
+                # move the projectiles out of the way eventhough not drawn on screen
+                projectile2.move((0, 0))
         
-        # gravity for projectile 3
-        vx, vy = projectile3.getVel()
-        vy += 0.1
-        projectile3.setVel((vx, vy))
-        # projectile 3 hitting obs
-        if col_check(projectile3.getRect(), floor.getRect()):
-            projectile3.setVel((0, 0))
-            throwable3 = False
-        elif col_check(projectile3.getRect(), left_wall.getRect()):
-            projectile3.setVel((0, 0))
-            throwable3 = False
-        elif col_check(projectile3.getRect(), right_wall.getRect()):
-            projectile3.setVel((0, 0))
-            throwable3 = False
-        elif col_check(projectile3.getRect(), ceiling.getRect()):
-            projectile3.setVel((0, 0))
-            throwable3 = False
+        if throwable3:
+            # gravity for projectile 3
+            vx, vy = projectile3.getVel()
+            vy += 0
+            projectile3.setVel((vx, vy))
+            # projectile 3 hitting obs
+            if col_check(projectile3.getRect(), floor.getRect()):
+                projectile3.setVel((0, 0))
+                throwable3 = False
+                # move the projectiles out of the way eventhough not drawn on screen
+                projectile3.move((0, 0))
+            elif col_check(projectile3.getRect(), left_wall.getRect()):
+                projectile3.setVel((0, 0))
+                throwable3 = False
+                # move the projectiles out of the way eventhough not drawn on screen
+                projectile3.move((0, 0))
+            elif col_check(projectile3.getRect(), right_wall.getRect()):
+                projectile3.setVel((0, 0))
+                throwable3 = False
+                # move the projectiles out of the way eventhough not drawn on screen
+                projectile3.move((0, 0))
+            elif col_check(projectile3.getRect(), ceiling.getRect()):
+                projectile3.setVel((0, 0))
+                throwable3 = False
+                # move the projectiles out of the way eventhough not drawn on screen
+                projectile3.move((0, 0))
 
         if cs.getState().getName() == "Shoot_projectile":
             gravity = False
@@ -634,17 +663,18 @@ def main():
                 if cs.getFacing() == "right":
                     projectile1.setVel((5, -8))
                     projectile2.setVel((3, -12))
-                    projectile3.setVel((6, -1))
+                    projectile3.setVel((6, 0))
                 elif cs.getFacing() == "left":
                     projectile1.setVel((-5, -8))
                     projectile2.setVel((-3, -12))
-                    projectile3.setVel((-6, -1))
+                    projectile3.setVel((-6, 0))
 
                 throwable1 = True
                 throwable2 = True
                 throwable3 = True
                 ctr += 1
         
+
         # Staggered
         if cs.getState().getName() == "Staggered":
             gravity = True
@@ -684,7 +714,6 @@ def main():
             
             # Die
             if mm.getState().getName() == "Die":
-                print("die ", mm.getState().getRect())
                 x, y = mm.getLoc()
                 mm.move((x, y-1))
                 mmgravity = True
@@ -701,7 +730,7 @@ def main():
                 # respawn x between 17 until 240 excluding cs position
                 x, y, w, h = cs.getState().getRect()
                 k, l, m, n = mm.findState("Intro").getRect()
-                r = randRangeExcept(x, w, m, 17, 240)
+                r = randRangeExcept(x, w, m, 33, display_width-(14*2)-1)
                 xval = random.choice(r)
                 mm.move((xval, 50))
                 mm.findState("Run").move((xval, 50)) # Fixed the respawn bug
@@ -778,8 +807,18 @@ def main():
             pr1_rect = projectile1.getRect()
             pr2_rect = projectile2.getRect()
             pr3_rect = projectile3.getRect()
-            if col_check(pr1_rect, mm_rect) or col_check(pr2_rect, mm_rect) or col_check(pr3_rect, mm_rect):
+            if col_check(pr1_rect, mm_rect):
                 mm.updateState(mm.findState("Frozen"))
+                # move the projectiles out of the way eventhough not drawn on screen
+                projectile1.move((0, 0))
+            elif col_check(pr2_rect, mm_rect):
+                mm.updateState(mm.findState("Frozen"))
+                # move the projectiles out of the way eventhough not drawn on screen
+                projectile2.move((0, 0))
+            elif col_check(pr3_rect, mm_rect):
+                mm.updateState(mm.findState("Frozen"))
+                # move the projectiles out of the way eventhough not drawn on screen
+                projectile3.move((0, 0))
             
             # MM and CS collide
             if cs.getState().getName() == "Stand" and mm.getState().getName() == "Run":
@@ -887,10 +926,10 @@ def main():
         label2 = myfont.render(disp_txt2, 1, (255, 255, 0)) # yellow
         label3 = myfont.render(disp_txt3, 1, (255, 255, 0)) # yellow
         label4 = myfont.render(disp_txt4, 1, (255, 255, 0)) # yellow
-        screen.blit(label1, (10, 200))
-        screen.blit(label2, (10, 210))
-        screen.blit(label3, (90, 200))
-        screen.blit(label4, (110, 210))
+        screen.blit(label1, (13, 291))
+        screen.blit(label2, (13, 301))
+        screen.blit(label3, (170, 291))
+        screen.blit(label4, (170, 301))
         pygame.display.update()
 
         # FPS
